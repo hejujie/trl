@@ -555,6 +555,7 @@ class KTOTrainer(Trainer):
                 fn_kwargs={"tokenizer": self.tokenizer, "embedding_tokenizer": self.embedding_tokenizer},
                 batched=True,
                 desc="Tokenizing train dataset",
+                num_proc=args.dataset_num_proc,
             )
             # Get KL datasets
             total_batch_size = (
@@ -567,7 +568,8 @@ class KTOTrainer(Trainer):
             # create pairs for estimating the KL term by flipping the matched pairs in each batch of size total_batch_size
             # i.e., (x_1, y_1), ..., (x_n, y_n) --> (x_1, y_n), ..., (x_n, y_1) = (x'_1, y'_1), ..., (x'_n, y'_n)
             train_kl_dataset = train_dataset.map(
-                _get_kl_dataset, batched=True, batch_size=total_batch_size, desc="Extracting KL train dataset"
+                _get_kl_dataset, batched=True, batch_size=total_batch_size, desc="Extracting KL train dataset",
+                num_proc=args.dataset_num_proc
             )
             # Prepare the datasets
             fn_kwargs = {
@@ -604,10 +606,13 @@ class KTOTrainer(Trainer):
                     fn_kwargs={"tokenizer": self.tokenizer, "embedding_tokenizer": self.embedding_tokenizer},
                     batched=True,
                     desc="Tokenizing eval dataset",
+                    num_proc=args.dataset_num_proc,
                 )
                 # Get KL dataset
                 eval_kl_dataset = eval_dataset.map(
-                    _get_kl_dataset, batched=True, batch_size=total_batch_size, desc="Extracting eval KL dataset"
+                    _get_kl_dataset, batched=True, batch_size=total_batch_size,
+                    desc="Extracting eval KL dataset",
+                    num_proc=args.dataset_num_proc,
                 )
                 # Process
                 fn_kwargs = {
